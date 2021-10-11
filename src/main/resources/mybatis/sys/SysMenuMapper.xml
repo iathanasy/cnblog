@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.icss.cnblog.mapper.SysMenuMapper">
+
+  <resultMap id="BaseResultMap" type="com.icss.cnblog.entity.SysMenuEntity">
+    <id column="menu_id" jdbcType="BIGINT" property="menuId" />
+    <result column="menu_name" jdbcType="VARCHAR" property="menuName" />
+    <result column="parent_id" jdbcType="BIGINT" property="parentId" />
+    <result column="order_num" jdbcType="INTEGER" property="orderNum" />
+    <result column="url" jdbcType="VARCHAR" property="url" />
+    <result column="is_frame" jdbcType="INTEGER" property="isFrame" />
+    <result column="menu_type" jdbcType="CHAR" property="menuType" />
+    <result column="visible" jdbcType="CHAR" property="visible" />
+    <result column="perms" jdbcType="VARCHAR" property="perms" />
+    <result column="icon" jdbcType="VARCHAR" property="icon" />
+    <result column="create_by" jdbcType="VARCHAR" property="createBy" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_by" jdbcType="VARCHAR" property="updateBy" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="remark" jdbcType="VARCHAR" property="remark" />
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    menu_id, menu_name, parent_id, order_num, url, is_frame, menu_type, visible, perms, 
+    icon, create_by, create_time, update_by, update_time, remark
+  </sql>
+
+  <select id="selectMenuListByUserId" parameterType="Long" resultMap="BaseResultMap">
+    SELECT distinct
+        m.menu_id,
+        m.menu_name,
+        m.menu_type,
+        m.parent_id,
+        m.url,
+        m.perms,
+        m.icon,
+        m.is_frame,
+        m.order_num,
+        m.visible
+    FROM
+        sys_menu m
+    LEFT JOIN sys_role_menu rm ON (m.menu_id = rm.menu_id)
+    LEFT JOIN sys_user_role ur ON (rm.role_id = ur.role_id)
+    WHERE
+        ur.user_id = #{userId}
+    ORDER BY
+        m.parent_id ASC,
+        m.order_num ASC
+  </select>
+
+  <select id="selectUrlAndPermsMenuList" resultMap="BaseResultMap">
+    SELECT
+      m.url,
+      m.perms
+    FROM
+        sys_menu m
+    WHERE m.url IS NOT NULL
+    ORDER BY
+        m.order_num ASC
+  </select>
+
+  <select id="selectAllNotButtonMenuList" parameterType="Long" resultMap="BaseResultMap">
+      SELECT distinct
+          m.menu_id,
+          m.menu_name,
+          m.menu_type,
+          m.parent_id,
+          m.url,
+          m.perms,
+          m.icon,
+          m.is_frame,
+          m.order_num,
+          m.visible
+      FROM
+        sys_menu m
+      LEFT JOIN sys_role_menu rm ON (m.menu_id = rm.menu_id)
+      LEFT JOIN sys_user_role ur ON (rm.role_id = ur.role_id)
+      WHERE
+          m.menu_type &lt;&gt; 'F'
+          AND m.visible = 0
+          AND ur.user_id = #{userId}
+      ORDER BY
+          m.parent_id ASC,
+          m.order_num ASC
+  </select>
+
+  <select id="selectAllMenuList" resultMap="BaseResultMap">
+    SELECT
+        m.menu_id,
+        m.menu_name,
+        m.menu_type,
+        m.parent_id,
+        m.url,
+        m.perms,
+        m.icon,
+        m.is_frame,
+        m.order_num,
+        m.visible
+    FROM
+        sys_menu m
+    ORDER BY
+        m.parent_id ASC,
+        m.order_num ASC
+  </select>
+</mapper>

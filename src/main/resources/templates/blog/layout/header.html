@@ -1,0 +1,80 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment = "head-fragment(title,keywords)">
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+
+    <meta name="author" th:content="${website['siteName']}">
+    <meta name="keywords" th:content="${title}+','+${keywords} + ','+${website['metaKeywords']}"/>
+    <meta name="description" th:content="${website['metaDesc']}" id="meta_description">
+
+    <title th:text="${title} + ' |  ' + ${website['siteName']}"></title>
+
+    <link rel="shortcut icon" type="image/x-icon" th:href="${#maps.containsKey(website,'favicon') == false ? '/static/images/favicon.ico' : website['favicon'] }"/>
+    <link rel="stylesheet" href="/static/layuiadmin/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="/static/plugins/md/css/prism.css">
+    <link rel="stylesheet" href="/static/blog/global.css?t=1579809530538-19" media="all">
+
+</head>
+
+<header th:fragment="header-fragment">
+    <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+    <!--[if lt IE 9]>
+    <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+    <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <div>
+        <a class="logo" href="/">
+            <img th:src="${#maps.containsKey(website,'logo') == false ? '/static/images/logo.jpg' : website['logo'] }" alt="Blog">
+        </a>
+        <div id="view"></div>
+        <!-- 导航菜单-->
+        <script id="nav" type="text/html">
+            {{#
+            var fn = function(a){
+            var result="";
+            result=layui.laytpl(childsTpl.innerHTML).render(a);
+            return result;
+            };
+            }}
+            <ul class="nav layui-nav nav-side" lay-filter="">
+                <li class="layui-nav-item" name="index"><a href="/index">首页</a></li>
+                {{# layui.each(d, function(index, item){ }}
+                {{#  if(item.childs.length === 0){ }}
+                <li class="layui-nav-item" name="/category/{{ item.alias }}"><a href="/category/{{ item.alias }}">{{ item.name }}</a></li>
+                {{#  }else{ }}
+                <li class="layui-nav-item" name="/category/{{ item.alias }}">
+                    <!--<a href="javascript:;">{{ item.name }}</a>-->
+                    <a href="/category/{{ item.alias }}">{{ item.name }}</a>
+                    {{ fn(item.childs) }}
+                </li>
+                {{#  } }}
+                {{#  }); }}
+            </ul>
+        </script>
+        <!-- 子集选择-->
+        <script id="childsTpl" type="text/html">
+            {{#
+            var fn = function(a){
+            var result="";
+            result=layui.laytpl(childsTpl.innerHTML).render(a);
+            return result;
+            };
+            }}
+            <dl class="layui-nav-child"> <!-- 二级菜单 -->
+                {{# layui.each(d, function(index, item){ }}
+                <dd><a href="/category/{{ item.alias }}">{{ item.name }}</a></dd>
+                {{#  }); }}
+            </dl>
+        </script>
+
+    </div>
+</header>
+
+
+</html>
+

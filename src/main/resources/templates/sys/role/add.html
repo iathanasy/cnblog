@@ -1,0 +1,146 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<header th:replace="sys/layout/header::header-fragment"></header>
+<body>
+    <div class="layui-fluid">
+        <div class="layui-row">
+            <div class="layui-col-md12">
+                <div class="layui-card layui-anim layui-anim-upbit">
+                    <div class="layui-card-header">添加角色
+                        <span class="btn_right"  >
+					        <a id="back" style="padding-right: 20px;" title="返回上一页" onclick="javascript:window.history.back(-1);"><i class="layui-icon layui-icon-release"></i></a>
+                            <!--<a id="refresh" title="刷新"><i class="layui-icon layui-icon-refresh"></i></a>-->
+                        </span>
+                    </div>
+                    <div class="layui-card-body">
+                        <form class="layui-form" lay-filter="roleFrom" style="padding: 20px 30px 0 0;">
+
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">角色名</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="roleName" class="layui-input" lay-verify="required">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">角色标识</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="roleKey" class="layui-input" lay-verify="required">
+                                </div>
+                            </div>
+
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">排序</label>
+                                <div class="layui-input-block">
+                                    <input type="number" name="roleSort" class="layui-input" lay-verify="required">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">状态</label>
+                                <div class="layui-input-block">
+                                    <input type="radio" name="status" value="0" title="正常" checked="">
+                                    <input type="radio" name="status" value="1" title="停用">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">角色权限</label>
+                                <div class="layui-input-block" id="menuTree" lay-filter="tree"></div>
+                            </div>
+                            <div class="layui-form-item layui-form-text">
+                                <label class="layui-form-label">备注</label>
+                                <div class="layui-input-block">
+                                    <textarea name="remark" placeholder="请输入内容" class="layui-textarea"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="layui-form-item">
+                                <div class="layui-input-block">
+                                    <button class="layui-btn" lay-submit lay-filter="add">立即提交</button>
+                                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 引入页脚footer-fragment -->
+    <div th:replace="sys/layout/footer::footer-fragment"></div>
+    <script type="text/javascript"  th:inline="none">
+            layui.config({
+                base: '/static/layuiadmin/module/'
+            }).use(['form','layer','common','eleTree'], function () {
+                var $ = layui.$,
+                    layer = layui.layer,
+                    common = layui.common,
+                    form = layui.form,
+                    eleTree = layui.eleTree;
+
+                var menuIdList =[];//不管是哪个角色都拥有修改密码的权限
+                var el;
+
+                //加载菜单树
+                el = eleTree.render({
+                    elem: '#menuTree',
+                    //data: data,
+                    emptText: "暂无数据",        // 内容为空的时候展示的文本
+                    url: "/sys/menu/tree",
+                    showCheckbox: true, // 节点是否可被选择
+                    //defaultExpandAll: true, // 是否默认展开所有节点
+                    defaultCheckedKeys: menuIdList, // 默认勾选的节点的 key 的数组
+                    defaultExpandedKeys: menuIdList,    // 默认展开的节点的 key 的数组
+                    checkStrictly: false, //  在显示复选框的情况下，是否严格的遵循父子不互相关联的做法，默认为 false
+                    accordion: true, //是否每次只打开一个同级树节点展开（手风琴效果）
+                    response: {   // 对于后台数据重新定义名字
+                        statusName: "code",
+                        statusCode: 200,
+                        dataName: "data"
+                    },
+                    request: {     // 对后台返回的数据格式重新定义
+                        name: "menuName",
+                        key: "menuId",
+                        children: "childMenus",
+                    },
+                });
+
+                //监听提交
+                form.on('submit(add)', function(data){
+                    var menuIdList = el.getChecked(false, true);// 获取选中的节点，接收两个 boolean 类型的参数，1. 是否只是叶子节点，默认值为 false 2. 是否包含半选节点，默认值为 false
+                    var list = [];
+                    layui.each(menuIdList, function(indx, item){
+                        list.push(item.menuId);
+                    });
+                    console.log(list);
+                    var json =  data.field;
+                    json.menuIdList = list;
+
+                    $.ajax({
+                        url: '/sys/role/add',
+                        data: JSON.stringify(json),
+                        success: function (res) {
+                            if(res.code == 200){
+                                layer.msg(res.msg, {
+                                    offset: '15px',
+                                    icon: 1,
+                                    time: 1000
+                                }, function () {
+                                    //返回上一页
+                                    window.location = 'list.html';
+                                });
+                            }else{
+                                layer.msg(res.msg, {
+                                    offset: '15px',
+                                    icon: 5,
+                                    time: 1000
+                                });
+                            }
+                        }
+                    });
+                    return false;
+                });
+
+            });
+
+        </script>
+</body>
+</html>

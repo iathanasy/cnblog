@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="blog/layout/header::head-fragment(${keyword},'')"></head>
+<body>
+
+<header th:replace="blog/layout/header::header-fragment"></header>
+
+<!--内容-->
+<main>
+    <div>
+    <!--通知-->
+    <div class="layui-row layui-col-space10">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <!--        <div class="layui-card-header">标题</div>-->
+                <div class="layui-card-body">
+                    <i class="layui-icon layui-icon-speaker"></i>
+                    <a class="speaker" href="/">结合 layui 的栅格系统</a>
+                </div>
+            </div>
+        </div>
+        <!--文章列表-->
+        <div class="layui-col-md9">
+            <div class="layui-card">
+                <div class="layui-card-body">
+                    <div class="box-title">
+                        <p style="font-size: 18px;">
+                            <span style="color: #01AAED" th:text="${keyword}"></span> 查询到
+                            <strong th:text="${page.totalCount}"></strong> 个结果
+                        </p>
+                        <em class="layadmin-font-em">耗时：<span th:text="${ms}"></span></em>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-card">
+                <div class="layui-card-body">
+                    <div class="box">
+                        <th:block th:each="blog : ${page.list}">
+                            <div class="article-list layui-anim layui-anim-up layui-anim-scale">
+                                <div class="img">
+                                    <a th:href="@{'/article/'+ ${blog.id}}">
+                                        <img class="l mr20" th:src="@{${blog.coverImage}}">
+                                    </a>
+                                </div>
+                                <div class="content">
+                                    <div class="title">
+                                        <span title="置顶" class="layui-badge" th:if="${blog.top eq 1}">置顶</span>
+                                        <h1><a th:href="@{'/article/'+ ${blog.id}}" th:text="${blog.title}"></a></h1>
+                                        <i title="推荐" class="layui-icon layui-icon-fire recommended" th:if="${blog.recommended eq 1}"></i>
+                                    </div>
+
+                                    <p class="article-list-content" th:text="${blog.summary}"></p>
+                                    <p class="meta">
+                                        <span><a th:href="@{'/category/'+ ${blog.alias}}" th:text="${blog.name}"></a></span>
+                                        <span th:text="${#dates.format(blog.createTime,'yyyy-MM-dd')} + '&nbsp;&nbsp;'"></span>
+                                        <span th:utext="${blog.pv} + '浏览&nbsp;&nbsp;'"></span>
+                                        <span>0评论</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </th:block>
+                    </div>
+
+                    <div th:if="${#lists.isEmpty(page.list)}">
+                        <div th:text="暂无数据" style="text-align:center"></div>
+                    </div>
+
+                    <div th:if="${not #lists.isEmpty(page.list)}">
+                        <div id="page"></div>
+                    </div>
+                    <!--<div id="page"></div>-->
+                </div>
+            </div>
+        </div>
+        <!-- 侧边栏-->
+        <div class="layui-col-md3">
+            <div th:replace="blog/layout/side::side-fragment"></div>
+        </div>
+    </div>
+    </div>
+</main>
+
+<footer th:replace="blog/layout/footer::footer-fragment"></footer>
+
+<script th:inline="javascript">
+    //注意：导航 依赖 element 模块，否则无法进行功能性操作
+    layui.use(['laypage'], function(){
+        var $=layui.jquery,laypage = layui.laypage;
+
+        var skipUrl = [[${url}]];
+
+        //分页
+        laypage.render({
+            elem: 'page'
+            ,count: [[${page.totalCount}]] //数据总数，从服务端得到
+            ,limit: [[${page.pageSize}]]
+            ,curr: [[${page.currPage}]]
+            // ,layout: ['prev', 'page', 'next','skip']
+            ,groups: 5
+            ,jump: function(obj, first){
+                //obj包含了当前分页的所有参数，比如：
+                 //console.log(obj.curr); //得到当前页，以便向服务端请求对应页的数据。
+                 //console.log(obj.limit); //得到每页显示的条数
+                //首次不执行
+                if(!first){
+                    window.location.href = skipUrl +"/" + obj.curr;
+                }
+            }
+        });
+
+    });
+</script>
+
+</body>
+</html>

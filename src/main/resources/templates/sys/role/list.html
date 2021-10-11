@@ -1,0 +1,184 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<header th:replace="sys/layout/header::header-fragment"></header>
+<body>
+    <div class="layui-fluid">
+        <div class="layui-card">
+            <div class="layui-card-header">角色列表
+                <span class="btn_right"  >
+					<a id="refresh" title="刷新"><i class="layui-icon layui-icon-refresh"></i></a>
+                </span>
+            </div>
+            <div class="layui-card-body">
+                <!--头部工具栏-->
+                <div class="toolbar">
+                    <div class="layui-row">
+                        <div class="layui-form-item">
+                            <div class="layui-col-md3" style="padding-left:0">
+                                <div class="input-group">
+                                    <input type="text" id="keywords" name="keywords" placeholder="请输入查找的内容" autocomplete="off" class="layui-input">
+                                    <span class="input-group-btn">
+                                        <button class="layui-btn" id="search" data-type="reload">
+                                            <i class="layui-icon layui-icon-search"></i>
+                                        </button>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="layui-row">
+                        <div class="layui-btn-container">
+                            <div class="layui-btn-group">
+                                <button id="add" data-type="add" class="layui-btn layui-btn-sm layui-bg-green"><i class="layui-icon layui-icon-add-1"></i>添加</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-row">
+                    <!--表单数据-->
+                    <table id="roleList" lay-filter="roleFilter"></table>
+
+                    <!---操作-->
+                    <script type="text/html" id="barTpl">
+                        <a href="#" title="编辑" lay-event="update"><i class="layui-icon layui-icon-edit" style="font-size: 25px;"></i></a>&nbsp;
+                        <a href="#" title="删除" lay-event="delete"><i class="layui-icon layui-icon-delete" style="font-size: 25px;"></i></a>
+                    </script>
+
+                    <!--状态-->
+                    <script type="text/html" id="stateTpl">
+                        {{#  if(d.status == 0){ }}
+                        <span style="color: #5FB878;"> 正常 </span>
+                        {{#  } else { }}
+                        <span style="color: #FF5722;"> 停用 </span>
+                        {{#  } }}
+                    </script>
+                </div>
+            </div>
+        </div>
+	</div>
+    <!-- 引入页脚footer-fragment -->
+    <div th:replace="sys/layout/footer::footer-fragment"></div>
+    <script type="text/javascript"  th:inline="none">
+        layui.config({
+            base: '/static/layuiadmin/module/'
+        }).use(['table','common'], function () {
+            var $ = layui.$, table = layui.table, common = layui.common;
+            //执行一个 table 实例
+            table.render({
+                elem: '#roleList'
+                ,title: '角色表'
+                ,height: 'full-110'
+                ,url: "/sys/role/list" //数据接口
+                ,request: {
+                    pageName: 'currPage' //页码的参数名称，默认：page
+                    ,limitName: 'pageSize' //每页数据量的参数名，默认：limit
+                }
+                ,response: {
+                    statusCode: 200 //规定成功的状态码，默认：0
+                }
+                ,page: true
+                ,limit: 10 //每页几条
+                ,even: true //开启隔行背景
+                ,cols: [[ //表头
+                    {type: 'numbers'}
+                    ,{field: 'roleId', title: 'ID', width:80, hide: true}
+                    ,{field: 'roleName', title: '角色名称', width:120}
+                    ,{field: 'roleKey', title: '角色标识', width:120}
+                    ,{field: 'remark', title: '角色描述', width:250}
+                    ,{field: 'status', title: '状态', width:110, align:"center", templet: '#stateTpl'}
+                    ,{field: 'createTime', title: '创建时间', width: 180}
+                    ,{title: '操作', minWidth:200, templet:'#barTpl',fixed:"right",align:"center"},
+                ]]
+                ,parseData: function(res) { //res 即为原始返回的数据
+                    if(res.code == 200)
+                        return {
+                            "code": res.code,//解析接口状态
+                            "msg": res.msg, //解析提示文本
+                            "count": res.data.totalCount, //解析数据长度
+                            "data": res.data.list //解析数据列表
+                        };
+                    else{
+                        return {
+                            "code": res.code,//解析接口状态
+                            "msg": res.msg //解析提示文本
+                        };
+                    }
+                }
+            });
+
+            //工具栏
+            var active = {
+                reload: function () {
+                    var key = $("#keywords").val();
+                    //执行重载
+                    table.reload('roleList', {
+                        page: {
+                            curr: 1 //重新从第 1 页开始
+                        }
+                        , where: {
+                            keywords: key
+                        }
+                    });
+                }
+                ,add: function(){
+                    window.location = 'add.html';
+                }
+            };
+
+            //搜索回车
+            document.onkeydown = function(e){
+                var ev =document.all ? window.event : e;
+                if(ev.keyCode==13) {
+                    $('#search').trigger("click");
+                    return false
+                }
+            }
+            //点击事件
+            $('.toolbar .layui-btn').on('click', function(){
+                var type = $(this).data('type');
+                active[type] ? active[type].call(this) : '';
+            });
+
+
+
+            //监听操作栏
+            table.on('tool(roleFilter)', function(obj){
+                var data = obj.data;
+                if(obj.event === 'update'){
+                    dataId = data.roleId;
+                    window.location = "update.html?dataId=" + dataId;
+                }else if(obj.event === 'delete'){
+                    var roleIds= [];
+                    roleIds.push(data.roleId);
+                    layer.confirm('确定要删除角色吗？', function(index){
+                        $.ajax({
+                            url: '/sys/role/delete',
+                            data: JSON.stringify(roleIds),
+                            success: function (res) {
+                                console.log(res);
+                                if(res.code == 200){
+                                    layer.msg(res.msg, {
+                                        offset: '15px',
+                                        icon: 1,
+                                        time: 1000
+                                    }, function () {
+                                        //刷新表格
+                                        table.reload('roleList');
+                                    });
+                                }else{
+                                    layer.msg(res.msg, {
+                                        offset: '15px',
+                                        icon: 5,
+                                        time: 1000
+                                    });
+                                }
+                            }
+                        });
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

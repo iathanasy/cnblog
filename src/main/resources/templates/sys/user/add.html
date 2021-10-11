@@ -1,0 +1,162 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<header th:replace="sys/layout/header::header-fragment"></header>
+<body>
+    <div class="layui-fluid">
+        <div class="layui-row">
+            <div class="layui-col-md12">
+                <div class="layui-card layui-anim layui-anim-upbit">
+                    <div class="layui-card-header">添加用户
+                        <span class="btn_right"  >
+					        <a id="back" style="padding-right: 20px;" title="返回上一页" onclick="javascript:window.history.back(-1);"><i class="layui-icon layui-icon-release"></i></a>
+                            <!--<a id="refresh" title="刷新"><i class="layui-icon layui-icon-refresh"></i></a>-->
+                        </span>
+                    </div>
+                    <div class="layui-card-body">
+                        <form class="layui-form" lay-filter="userFrom" style="padding: 20px 30px 0 0;">
+
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">用户名</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="userName" class="layui-input" lay-verify="required">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">昵称</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="nickName" class="layui-input" lay-verify="required">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">密码</label>
+                                <div class="layui-input-block">
+                                    <input type="password" name="password" class="layui-input" lay-verify="required">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">电话</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="phonenumber" class="layui-input" lay-verify="phone">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">邮箱</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="email" class="layui-input" lay-verify="email">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">性别</label>
+                                <div class="layui-input-block">
+                                    <input type="radio" name="sex" value="0" title="男" checked="">
+                                    <input type="radio" name="sex" value="1" title="女">
+                                    <input type="radio" name="sex" value="2" title="未知">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">状态</label>
+                                <div class="layui-input-block">
+                                    <input type="radio" name="status" value="0" title="正常" checked="">
+                                    <input type="radio" name="status" value="1" title="停用">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">角色</label>
+                                <div class="layui-input-block" id="roleIdList" lay-verify-msg="请选择角色"
+                                     lay-verify="roles">
+                                </div>
+                            </div>
+                            <div class="layui-form-item layui-form-text">
+                                <label class="layui-form-label">备注</label>
+                                <div class="layui-input-block">
+                                    <textarea name="remark" placeholder="请输入内容" class="layui-textarea"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="layui-form-item">
+                                <div class="layui-input-block">
+                                    <button class="layui-btn" lay-submit lay-filter="add">立即提交</button>
+                                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 引入页脚footer-fragment -->
+    <div th:replace="sys/layout/footer::footer-fragment"></div>
+    <script type="text/javascript"  th:inline="none">
+            layui.config({
+                base: '/static/layuiadmin/module/'
+            }).use(['form','layer','common'], function () {
+                var $ = layui.$,
+                    layer = layui.layer,
+                    common = layui.common,
+                    form = layui.form;
+
+                var roleList;
+
+                //角色选择
+                $.post("/sys/role/select",function(res){
+                    if(res.code == 200){
+                        var data = res.data;
+                        var html = "";
+
+                        layui.each(data, function(index, item){
+                            //html += "<input type=\"checkbox\" name= roleIdList["+item.roleId+ "] value='"+ item.roleId +"' title= '"+ item.roleName +"'>";
+                            html += "<input type=\"checkbox\" name= \"roleIdList\" value='"+ item.roleId +"' title= '"+ item.roleName +"'>";
+                        });
+                        $("#roleIdList").html(html);
+                        //动态生成必须更新渲染
+                        form.render();
+                    }else{
+                        layer.msg(res.msg, {
+                            offset: '15px',
+                            icon: 5,
+                            time: 1000
+                        });
+                    }
+                },'json');
+
+                //监听提交
+                form.on('submit(add)', function(data){
+                    //获取checkbox[name='roleIdList']的值
+                    var arr = new Array();
+                    $("input:checkbox[name='roleIdList']:checked").each(function(i){
+                        arr[i] = $(this).val();
+                    });
+                    data.field.roleIdList = arr;//将数组合并成字符串
+                    var json = JSON.stringify(data.field);
+                    $.ajax({
+                        url: '/sys/user/add',
+                        data: json,
+                        success: function (res) {
+                            console.log(res);
+                            if(res.code == 200){
+                                layer.msg(res.msg, {
+                                    offset: '15px',
+                                    icon: 1,
+                                    time: 1000
+                                }, function () {
+                                    //返回上一页
+                                    window.location = 'list.html';
+                                });
+                            }else{
+                                layer.msg(res.msg, {
+                                    offset: '15px',
+                                    icon: 5,
+                                    time: 1000
+                                });
+                            }
+                        }
+                    });
+                    return false;
+                });
+
+            });
+
+        </script>
+</body>
+</html>

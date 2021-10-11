@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.icss.cnblog.modules.blog.mapper.BizCategoryMapper">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.icss.cnblog.modules.blog.entity.BizCategoryEntity" id="bizCategoryMap">
+        <result property="id" column="id"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="name" column="name"/>
+        <result property="alias" column="alias"/>
+        <result property="status" column="status"/>
+        <result property="nav" column="nav"/>
+        <result property="sort" column="sort"/>
+        <result property="color" column="color"/>
+        <result property="remark" column="remark"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+
+    <!-- 列表(第一级) -->
+    <select id="selectParentList" resultMap="bizCategoryMap">
+        SELECT
+            c.*
+        FROM
+            biz_category c
+        WHERE
+            c.parent_id = 0
+            AND c.`status` = 1
+        ORDER BY
+            c.sort
+    </select>
+    <!-- 列表(子集) -->
+    <select id="selectChildsList" parameterType="Long" resultMap="bizCategoryMap">
+        SELECT
+          c.*
+        FROM
+          biz_category c
+        <![CDATA[
+        WHERE
+          c.parent_id <> 0
+          AND c.parent_id = #{parentId}
+          AND c.`status` = 1
+        ]]>
+        ORDER BY
+          c.sort
+    </select>
+
+    <!-- 首页导航栏-->
+    <select id="selectNav" resultMap="bizCategoryMap">
+        SELECT
+            c.id,
+            c.parent_id,
+            c.`name`,
+            c.alias,
+            c.color
+        FROM
+            biz_category c
+        WHERE
+                c.parent_id = 0
+            AND c.`status` = 1
+            AND c.nav = 1
+        ORDER BY
+            c.sort
+    </select>
+
+    <!-- 首页导航栏子集-->
+    <select id="selectNavChilds" parameterType="Long" resultMap="bizCategoryMap">
+        SELECT
+            c.id,
+            c.parent_id,
+            c.`name`,
+            c.alias,
+            c.color
+        FROM
+          biz_category c
+        <![CDATA[
+        WHERE
+          c.parent_id <> 0
+          AND c.parent_id = #{parentId}
+        ]]>
+          AND c.`status` = 1
+          AND c.nav = 1
+        ORDER BY
+          c.sort
+    </select>
+
+</mapper>

@@ -1,0 +1,151 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<header th:replace="sys/layout/header::header-fragment"></header>
+<body>
+    <div class="layui-fluid">
+        <div class="layui-card">
+            <div class="layui-card-header">在线用户列表
+                <span class="btn_right"  >
+					<a id="refresh" title="刷新"><i class="layui-icon layui-icon-refresh"></i></a>
+                </span>
+            </div>
+            <div class="layui-card-body">
+
+                <div class="layui-row">
+                    <!--表单数据-->
+                    <table id="userOnlineList" lay-filter="userOnlineFilter"></table>
+
+                    <!---操作-->
+                    <script type="text/html" id="barTpl">
+                        {{#  if(d.userStatus == '0'){ }}
+                        <span style="color: #5FB878;"> 当前 </span>
+                        {{#  } else { }}
+                        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="kickout"><i class="layui-icon layui-icon-delete"></i>强踢</a>
+                        {{#  } }}
+                    </script>
+                </div>
+            </div>
+        </div>
+	</div>
+    <!-- 引入页脚footer-fragment -->
+    <div th:replace="sys/layout/footer::footer-fragment"></div>
+    <script type="text/javascript"  th:inline="none">
+        layui.config({
+            base: '/static/layuiadmin/module/'
+        }).use(['table','common'], function () {
+            var $ = layui.$, table = layui.table, common = layui.common;
+            //执行一个 table 实例
+            table.render({
+                elem: '#userOnlineList'
+                ,title: '用户在线表'
+                ,height: 'full-110'
+                ,url: "/sys/online/list" //数据接口
+                ,request: {
+                    pageName: 'currPage' //页码的参数名称，默认：page
+                    ,limitName: 'pageSize' //每页数据量的参数名，默认：limit
+                }
+                ,response: {
+                    statusCode: 200 //规定成功的状态码，默认：0
+                }
+                ,page: true
+                ,limit: 10 //每页几条
+                ,even: true //开启隔行背景
+                ,cols: [[ //表头
+                    {type: 'numbers'}
+                    ,{field: 'sessionId', title: '会话ID', width: 250}
+                    ,{field: 'userName', title: '用户名', width:120}
+                    ,{field: 'nickName', title: '昵称', width:120}
+                    ,{field: 'host', title: '主机', width:110}
+                    ,{field: 'loginLocation', title: '登录地点', width:120}
+                    ,{field: 'browser', title: '浏览器', width:120}
+                    ,{field: 'os', title: '操作系统', width:120}
+                    ,{field: 'timeout', title: '超时', width:120}
+                    ,{field: 'startTimestamp', title: '登陆时间', width: 150}
+                    ,{field: 'lastAccessTime', title: '最后访问时间', width: 180}
+                    ,{title: '操作', minWidth:120, templet:'#barTpl',fixed:"right",align:"center"},
+                ]]
+                ,parseData: function(res) { //res 即为原始返回的数据
+                    if(res.code == 200)
+                        return {
+                            "code": res.code,//解析接口状态
+                            "msg": res.msg, //解析提示文本
+                            "count": res.data.totalCount, //解析数据长度
+                            "data": res.data.list //解析数据列表
+                        };
+                    else{
+                        return {
+                            "code": res.code,//解析接口状态
+                            "msg": res.msg //解析提示文本
+                        };
+                    }
+                }
+            });
+
+            //工具栏
+            var active = {
+                reload: function () {
+                    var key = $("#keywords").val();
+                    //执行重载
+                    table.reload('userOnlineList', {
+                        page: {
+                            curr: 1 //重新从第 1 页开始
+                        }
+                        , where: {
+                            keywords: key
+                        }
+                    });
+                }
+            };
+
+            //搜索回车
+            document.onkeydown = function(e){
+                var ev =document.all ? window.event : e;
+                if(ev.keyCode==13) {
+                    $('#search').trigger("click");
+                    return false
+                }
+            }
+            //点击事件
+            $('.toolbar .layui-btn').on('click', function(){
+                var type = $(this).data('type');
+                active[type] ? active[type].call(this) : '';
+            });
+
+
+
+            //监听操作栏
+            table.on('tool(userOnlineFilter)', function(obj){
+                var data = obj.data;
+                if(obj.event === 'kickout'){
+                    sessionId = data.sessionId;
+                    layer.confirm('确定要删除用户吗？', function(index){
+                        $.ajax({
+                            url: '/sys/online/kickout',
+                            data: JSON.stringify(sessionId),
+                            success: function (res) {
+                                console.log(res);
+                                if(res.code == 200){
+                                    layer.msg(res.msg, {
+                                        offset: '15px',
+                                        icon: 1,
+                                        time: 1000
+                                    }, function () {
+                                        //刷新表格
+                                        table.reload('userOnlineList');
+                                    });
+                                }else{
+                                    layer.msg(res.msg, {
+                                        offset: '15px',
+                                        icon: 5,
+                                        time: 1000
+                                    });
+                                }
+                            }
+                        });
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,173 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<header th:replace="sys/layout/header::header-fragment"></header>
+<body>
+    <div class="layui-fluid">
+        <div class="layui-card">
+            <div class="layui-card-header">网站配置
+                <span class="btn_right"  >
+                    <a id="refresh" title="刷新"><i class="layui-icon layui-icon-refresh"></i></a>
+                 </span>
+            </div>
+            <div class="layui-card-body">
+                <div class="layui-tab layui-tab-brief" lay-filter="systemTab">
+                    <ul class="layui-tab-title">
+                        <li class="layui-this">网站设置</li>
+                        <li>SEO设置</li>
+                        <li>底部设置</li>
+                        <li>其他设置</li>
+                    </ul>
+                    <div class="layui-tab-content">
+                        <!-- 网站设置 -->
+                        <div class="layui-tab-item layui-show">
+                            <form class="layui-form">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">网站名称</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" name="siteName" th:value="${website['siteName']}" class="layui-input">
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">网站域名</label>
+                                    <div class="layui-input-block">
+                                        <input type="text" name="domain" th:value="${website['domain']}" class="layui-input">
+                                    </div>
+                                </div>
+
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">首页LOGO</label>
+                                    <div class="layui-input-block">
+                                        <input name="logo" th:value="${website['logo']}" class="layui-input"/>
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">Favicon.ico</label>
+                                    <div class="layui-input-block">
+                                        <input name="favicon" th:value="${website['favicon']}" class="layui-input"/>
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <div class="layui-input-block">
+                                        <button class="layui-btn" lay-submit="" lay-filter="website">确认保存</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <!-- SEO设置 -->
+                        <div class="layui-tab-item">
+                            <form class="layui-form">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">首页标题</label>
+                                    <div class="layui-input-block">
+                                        <input name="title" th:value="${website['title']}" type="text" required  lay-verify="required" placeholder="请输入标题" autocomplete="off" class="layui-input"/>
+                                    </div>
+                                </div>
+                                <div class="layui-form-item layui-form-text">
+                                    <label class="layui-form-label">META关键词</label>
+                                    <div class="layui-input-block">
+                                        <textarea name="metaKeywords" th:text="${website['metaKeywords']}" class="layui-textarea" placeholder="多个关键词用英文状态 , 号分割"></textarea>
+                                    </div>
+                                </div>
+                                <div class="layui-form-item layui-form-text">
+                                    <label class="layui-form-label">META描述</label>
+                                    <div class="layui-input-block">
+                                        <textarea name="metaDesc" th:text="${website['metaDesc']}" class="layui-textarea"></textarea>
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <div class="layui-input-block">
+                                        <button class="layui-btn" lay-submit="" lay-filter="website">确认保存</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <!-- 底部设置 -->
+                        <div class="layui-tab-item">
+                            <form class="layui-form">
+                                <div class="layui-form-item layui-form-text">
+                                    <label class="layui-form-label">版权信息</label>
+                                    <div class="layui-input-block">
+                                        <textarea name="copyright" th:utext="${website['copyright']}" class="layui-textarea"></textarea>
+                                    </div>
+                                </div>
+                                <div class="layui-form-item layui-form-text">
+                                    <label class="layui-form-label">网站备案号</label>
+                                    <div class="layui-input-block">
+                                        <textarea name="icp" th:utext="${website['icp']}" class="layui-textarea"></textarea>
+                                    </div>
+                                </div>
+                                <div class="layui-form-item layui-form-text">
+                                    <label class="layui-form-label">底部HTML</label>
+                                    <div class="layui-input-block">
+                                        <textarea name="statistics" th:utext="${website['statistics']}" placeholder="可用于添加统计" class="layui-textarea"></textarea>
+                                    </div>
+                                </div>
+                                <div class="layui-form-item">
+                                    <div class="layui-input-block">
+                                        <button class="layui-btn" lay-submit="" lay-filter="website">确认保存</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <!-- 其他设置 -->
+                        <div class="layui-tab-item">
+                            <form class="layui-form">
+                                <div class="layui-form-item">
+                                    <label class="layui-form-label">允许评论？</label>
+                                    <div class="layui-input-block">
+                                        <input type="radio" name="commentSwitch" th:value="1" th:checked="${website['commentSwitch'] == '1'}" title="开启">
+                                        <input type="radio" name="commentSwitch" th:value="0" th:checked="${website['commentSwitch'] == '0'}"  title="关闭">
+                                    </div>
+                                </div>
+
+                                <div class="layui-form-item">
+                                    <div class="layui-input-block">
+                                        <button class="layui-btn" lay-submit="" lay-filter="website">确认保存</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 引入页脚footer-fragment -->
+    <div th:replace="sys/layout/footer::footer-fragment"></div>
+    <script type="text/javascript"  th:inline="none">
+            layui.use(['form','layer','element'], function () {
+                var $ = layui.$,
+                    layer = layui.layer,
+                    element = layui.element,
+                    form = layui.form;
+
+                //监听提交
+                form.on('submit(website)', function(data){
+                    var field =  data.field;
+                    $.ajax({
+                        url: '/sys/config/website',
+                        type: "post",
+                        data: field,
+                        success: function (res) {
+                            if(res.code == 200){
+                                layer.msg(res.msg, {
+                                    offset: '15px',
+                                    icon: 1,
+                                    time: 1000
+                                });
+                            }else{
+                                layer.msg(res.msg, {
+                                    offset: '15px',
+                                    icon: 5,
+                                    time: 1000
+                                });
+                            }
+                        }
+                    });
+                    return false;
+                });
+            });
+
+        </script>
+</body>
+</html>

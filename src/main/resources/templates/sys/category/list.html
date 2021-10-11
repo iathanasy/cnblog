@@ -1,0 +1,169 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<header th:replace="sys/layout/header::header-fragment"></header>
+<body>
+    <div class="layui-fluid">
+        <div class="layui-card">
+            <div class="layui-card-header">类别列表
+                <span class="btn_right"  >
+					<a id="refresh" title="刷新"><i class="layui-icon layui-icon-refresh"></i></a>
+                </span>
+            </div>
+            <div class="layui-card-body">
+                <!--头部工具栏-->
+                <div class="toolbar">
+                    <div class="layui-row">
+                        <div class="layui-btn-container">
+                            <div class="layui-btn-group">
+                                <button id="add" data-type="add" class="layui-btn layui-btn-sm layui-bg-green"><i class="layui-icon layui-icon-add-1"></i>添加</button>
+                                <button class="layui-btn layui-btn-primary" data-type="openAll">全部展开</button>
+                                <button class="layui-btn layui-btn-primary" data-type="closeAll">全部关闭</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-row categoryList">
+                    <!--表单数据-->
+                    <table class="layui-table" id="categoryList" lay-filter="categoryFilter"></table>
+                </div>
+            </div>
+        </div>
+	</div>
+    <!-- 引入页脚footer-fragment -->
+    <div th:replace="sys/layout/footer::footer-fragment"></div>
+    <script type="text/javascript"  th:inline="none">
+        layui.config({
+            base: '/static/layuiadmin/module/'
+        }).use(['table','form','common','treeTable'], function () {
+            var $ = layui.$
+                ,table = layui.table
+                ,form = layui.form
+                ,treeTable = layui.treeTable
+                ,common = layui.common;
+
+            var data;
+            $.ajaxSettings.async = false;//同步
+            $.post("/sys/category/list", function(res) {
+                if (res.code === 200) {
+                    data = res.data;
+                }else if(res.code === 401){
+                    $(".categoryList").html('<div class="layui-none">'+res.msg+'</div>');
+                }
+            });
+
+            //执行一个 table 实例
+            var re = treeTable.render({
+                elem: '#categoryList'
+                //,url: "/sys/menu/list" // （url和data参数必须设置一个）
+                ,data: data
+                ,height: 'full-20'
+                ,icon_key: 'name'// 必须
+                ,primary_key: 'id'
+                ,parent_key: 'parentId'
+                ,is_click_icon: false
+                ,is_checkbox: false
+                ,end: function(e){
+                    form.render();
+                },
+                cols: [
+                    {key: 'name', title: '名称', width: '160px'},
+                    {key: 'parentName', title: '上级菜单', width: '100px', align: 'center',
+                        template: function(item){
+                            return item.parentName == null ? '' : item.parentName;
+                        }
+                    },
+                    {key: 'alias', title: '别名', width: '100px', align: 'center',
+                        template: function(item){
+                            return item.alias == null ? '' : item.alias;
+                        }
+                    },
+                    {key: 'status', title: '状态',width:'120px', align: 'center',
+                        template: function(item){
+                            return item.status != '0' ? '<i class="layui-icon layui-icon-ok"></i>' : '<i class="layui-icon layui-icon-close"></i>';
+                        }
+                    },
+                    {key: 'nav', title: '导航显示',width:'120px', align: 'center',
+                        template: function(item){
+                            return item.nav != '0' ? '<i class="layui-icon layui-icon-ok"></i>' : '<i class="layui-icon layui-icon-close"></i>';
+                        }
+                    },
+                    {key: 'color', title: '颜色', width: '100px', align: 'center',
+                        template: function(item){
+                            var html = '<span color="'+item.color+'" class="span-color" style="background:'+item.color+'">'+item.name+'</span>'
+                            return item.color == '' ? '' : html;
+                        }
+                    },
+                    {key: 'sort', title: '排序', width: '100px', align: 'center'},
+
+                    {
+                        title: '操作',
+                        align: 'center',
+                        width: '160px',
+                        template: function(item){
+                            return '<a href="#" title="编辑" lay-filter="update"><i class="layui-icon layui-icon-edit" style="font-size: 25px;"></i></a>&nbsp'
+                                +'<a href="#" title="删除" lay-filter="delete"><i class="layui-icon layui-icon-delete" style="font-size: 25px;"></i></a>';
+                        }
+                    }
+                ]
+            });
+
+            //工具栏
+            var active = {
+                //刷新 刷新重载树表（一般在异步处理数据后刷新显示）
+                /*reload: function(){
+                    treeTable.render(re);
+                },*/
+                add: function(){
+                    window.location = 'add.html';
+                }
+                //全部展开
+                ,openAll: function(){
+                    treeTable.openAll(re);
+                }
+                //全部关闭
+                ,closeAll: function(){
+                    treeTable.closeAll(re);
+                }
+            };
+
+            //点击事件
+            $('.toolbar .layui-btn').on('click', function(){
+                var type = $(this).data('type');
+                active[type] ? active[type].call(this) : '';
+            });
+
+            // 监听操作修改
+            treeTable.on('tree(update)',function(data){
+                //console.log(JSON.stringify(data));
+                dataId = data.item.id;
+                window.location = "update.html?dataId=" + dataId;
+            });
+            // 监听操作删除
+            treeTable.on('tree(delete)',function(data){
+                //console.log(JSON.stringify(data));
+                var categoryId = data.item.id;
+                layer.confirm('确定要删除类别吗？', function(index){
+                    $.post("/sys/category/delete?categoryId="+ categoryId, function(res){
+                        if(res.code == 200){
+                            layer.msg(res.msg, {
+                                offset: '15px',
+                                icon: 1,
+                                time: 1000
+                            }, function () {
+                                //刷新表格
+                                window.location.reload();
+                            });
+                        }else{
+                            layer.msg(res.msg, {
+                                offset: '15px',
+                                icon: 5,
+                                time: 1000
+                            });
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>

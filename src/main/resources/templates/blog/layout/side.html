@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="side-fragment">
+    <section>
+        <div class="layui-card">
+            <div class="layui-card-header">文章检索</div>
+            <div class="layui-card-body">
+                <form class="layui-form">
+                    <input id="keyword" class="search-input" required lay-verify="required" name="keyword" autocomplete="off" placeholder="输入关键词">
+                    <div id="sugItem" class="search-input-tip" style="background-color: rgb(255, 255, 255); display: none; z-index: 1; position: absolute; margin-left: -1px; margin-top: 38px; border: 0.5px solid rgb(230, 230, 230);"></div>
+                    <button id="searchButton" class="layui-btn layui-btn-normal" lay-submit="" lay-filter="search"><i class="layui-icon layui-icon-search"></i> 搜索
+                    </button>
+                    <div class="clear"></div>
+                </form>
+            </div>
+        </div>
+
+        <div class="layui-card">
+            <div class="layui-card-header">文章标签</div>
+            <div class="layui-card-body">
+                <div class="tags"></div>
+            </div>
+        </div>
+    </section>
+</div>
+</html>

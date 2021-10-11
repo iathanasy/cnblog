@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Internal Server Error</title>
+</head>
+<body>
+    <h1>Internal Server Error</h1>
+    <h4>抱歉，服务器发生异常。</h4>
+    <p th:text="${error}"></p>
+    <p th:text="${status}"></p>
+    <p th:text="${message}"></p>
+</body>
+</html>

@@ -1,0 +1,123 @@
+﻿
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>后台管理系统</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <link rel="stylesheet" href="/static/layuiadmin/layui/css/layui.css" media="all">
+    <link rel="stylesheet" href="/static/layuiadmin/style/login.css" media="all">
+</head>
+<body>
+    <div class="layadmin-user-login layadmin-user-display-show" id="LAY-user-login" style="display: none;">
+        <div class="layadmin-user-login-main">
+            <div class="layadmin-user-login-box layadmin-user-login-header">
+                <h2>登录管理系统</h2>
+                <p>登陆后台管理系统</p>
+            </div>
+            <div class="layadmin-user-login-box layadmin-user-login-body layui-form">
+                <div class="layui-form-item">
+                    <label class="layadmin-user-login-icon layui-icon layui-icon-username" for="LAY-user-login-username"></label>
+                    <input type="text" value="admin" name="username" id="LAY-user-login-username" lay-verify="required" lay-verType="tips" placeholder="用户名" class="layui-input">
+                </div>
+                <div class="layui-form-item">
+                    <label class="layadmin-user-login-icon layui-icon layui-icon-password" for="LAY-user-login-password"></label>
+                    <input type="password" value="123456" name="password" id="LAY-user-login-password" lay-verify="required" lay-verType="tips" placeholder="密码" class="layui-input">
+                </div>
+                <div class="layui-form-item">
+                    <div class="layui-row">
+                        <div class="layui-col-xs7">
+                            <label class="layadmin-user-login-icon layui-icon layui-icon-vercode" for="LAY-user-login-vercode"></label>
+                            <input type="text" name="kaptcha" id="LAY-user-login-vercode" lay-verify="required" lay-verType="tips" placeholder="图形验证码" class="layui-input">
+                        </div>
+                        <div class="layui-col-xs5">
+                            <div style="margin-left: 10px;">
+                                <img src="/gifCode" class="layadmin-user-login-codeimg" alt="点击获取验证码" id="LAY-user-get-vercode">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <button id="login-submit" class="layui-btn layui-btn-fluid" lay-submit lay-filter="LAY-user-login-submit">登 录</button>
+                </div>
+
+                <div class="layui-trans layadmin-user-login-footer">
+
+                    <p>© @DateTime.Now.Year <a href="127.0.0.1" target="_blank">半仙企业</a></p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <!--[if lt IE 9]>
+    <meta http-equiv="refresh" content="0;ie.html" />
+    <![endif]-->
+    <!--不局限与iframe 中-->
+    <script>
+
+        if (window.top !== window.self) {
+            window.top.location = window.location;
+        }
+
+
+    </script>
+
+    <!--踢出用户-->
+    <script>
+
+    </script>
+    <script src="/static/layuiadmin/layui/layui.js"></script>
+    <script type="text/javascript">
+        layui.use(['form', 'layer'], function () {
+            var $ = layui.$, form = layui.form, layer = layui.layer;
+            //提交
+            form.on('submit(LAY-user-login-submit)', function (obj) {
+                var _that = $(this);
+                _that.text("登录中...").attr("disabled", "disabled").addClass("layui-disabled");
+                //请求登入接口
+                $.ajax({
+                    url: '/ajaxLogin',
+                    type:'POST',
+                    data: obj.field,
+                    success: function (res) {
+                        if (res.code === 200) {
+                            //登入成功的提示与跳转
+                            layer.msg(res.msg, {icon: 1,time: 1000}, function () {
+                                location.href = 'sys/index.html';
+                            });
+                        }
+                        else {
+                            layer.msg(res.msg, { icon: 2, time: 1000 });
+                            _that.text("登 录").removeAttr("disabled").removeClass("layui-disabled");
+                            $("#LAY-user-get-vercode").attr("src", '/gifCode?time=' + new Date().getTime());
+                        }
+                    }
+                });
+            });
+
+            $("#LAY-user-get-vercode").click(function () {
+                $(this).attr("src", '/gifCode?time=' + new Date().getTime());
+            });
+
+            document.onkeydown = function (event) {
+                var e = event || window.event || arguments.callee.caller.arguments[0];
+                if (e && e.keyCode == 13) {
+                    $("#login-submit").click();
+                }
+            };
+
+            function kickout(){
+                var href=location.href;
+                if(href.indexOf("kickout")>0){
+                    layer.msg("您的账号在另一台设备上登录,如非本人操作，请立即修改密码！",{icon: 5,time: 1000});
+                }
+            }
+            window.onload=kickout();
+
+        });
+
+
+    </script>
+
+</body>
+</html>

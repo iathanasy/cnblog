@@ -1,0 +1,398 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<header th:replace="sys/layout/header::header-fragment"></header>
+
+<body>
+<div class="layui-fluid">
+    <div class="layui-card layui-anim layui-anim-upbit">
+        <div class="layui-card-header">修改文章
+            <span class="btn_right"  >
+					        <a id="back" style="padding-right: 20px;" title="返回上一页" onclick="javascript:window.history.back(-1);"><i class="layui-icon layui-icon-release"></i></a>
+                <!--<a id="refresh" title="刷新"><i class="layui-icon layui-icon-refresh"></i></a>-->
+                        </span>
+        </div>
+        <div class="layui-card-body">
+            <div class="layui-row">
+                <form class="layui-form" lay-filter="articleFrom" style="padding: 20px 30px 0 0;">
+                    <div class="layui-col-md12">
+                        <div class="layui-form-item layui-row">
+                            <label class="mylayui-form-label layui-col-md1 layui-col-sm1 layui-col-xs12">标题</label>
+                            <div class="layui-col-md11 layui-col-sm11 layui-col-xs12">
+                                <input type="hidden"  name="id" class="layui-input">
+                                <input type="text" name="title" required lay-verify="required" placeholder="请输入文章标题"
+                                       autocomplete="off" class="layui-input">
+                            </div>
+                        </div>
+                        <fieldset class="layui-elem-field">
+                            <legend style="font-size: 16px;"><strong>编辑</strong></legend>
+                            <div class="layui-row">
+                                <div class="layui-col-md12">
+                                    <div id="md_editor"></div>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+                    <div class="layui-row">
+                        <div class="layui-col-md7 layui-col-sm12 layui-col-xs12">
+                            <fieldset class="layui-elem-field">
+                                <legend style="font-size: 16px;"><strong>摘要、封面</strong></legend>
+                                <div class="layui-form-item layui-row">
+                                    <div class="layui-col-md11 layui-col-sm11 layui-col-xs12">
+                                <textarea name="summary" placeholder="摘要 选填，30字内，如不填写会默认抓取首段内容"
+                                          class="layui-textarea"></textarea>
+                                    </div>
+                                </div>
+                                <div class="layui-form-item layui-row">
+                                    <div class="layui-col-md11 layui-col-sm11 layui-col-xs12">
+                                        <input type="hidden" name="coverImage"  id="LAY_coverSrc" placeholder="封面图片地址" class="layui-input">
+                                        <div class="layui-input-inline layui-btn-container" style="width: auto;">
+                                            <button type="button" class="layui-btn layui-btn-primary" id="LAY_coverUpload">
+                                                <i class="layui-icon">&#xe67c;</i>上传封面
+                                            </button>
+                                            <button  type="button" class="layui-btn ayui-btn-primary" layadmin-event="coverPreview">查看封面</button >
+                                        </div>
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+
+                        <div class="layui-col-md5 layui-col-sm12 layui-col-xs12">
+                            <div class="layui-form-item layui-row">
+                                <div class="layui-col-md12 layui-col-sm12 layui-col-xs12">
+                                    <fieldset class="layui-elem-field">
+                                        <legend style="font-size: 16px;"><strong>标签</strong></legend>
+                                        <div class="layui-form-item layui-field-box">
+                                            <input type="text" id="tags" class="layui-input"
+                                                   placeholder="标签之间英文逗号间隔" autocomplete="off">
+
+                                            <div class="select-tags">
+                                                <span color="#dd00ff" class="span-color"
+                                                      style="background:#dd00ff">标签</span>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                    <fieldset class="layui-elem-field">
+                                        <legend style="font-size: 16px;"><strong>类别</strong></legend>
+                                        <div class="layui-form-item layui-field-box">
+                                            <select name="categoryId" id="categoryId" lay-verify="required">
+
+                                            </select>
+                                        </div>
+                                    </fieldset>
+                                    <fieldset class="layui-elem-field">
+                                        <legend style="font-size: 16px;"><strong>OMG</strong></legend>
+                                        <div class="layui-form-item layui-field-box">
+                                            <input type="checkbox" name="top" lay-skin="switch" lay-text="顶置|不顶置">
+                                            <input type="checkbox" name="recommended" lay-skin="switch"
+                                                   lay-text="推荐|不推荐"
+                                                   checked>
+                                        </div>
+                                        <div class="layui-form-item layui-field-box">
+                                            <input type="checkbox" name="comment" title="评论" checked>
+                                            <input type="checkbox" name="original" title="原创" checked>
+                                        </div>
+                                        <div class="layui-form-item layui-field-box">
+                                            <input type="text" name="password" placeholder="请输入访问密码"
+                                                   class="layui-input">
+                                            <div class="layui-form-mid layui-word-aux">访问密码,为空表示没有密码</div>
+                                        </div>
+                                    </fieldset>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="layui-row">
+                        <div class="layui-col-md12">
+                            <div class="layui-form-item">
+                                <button id="update" type="button" class="layui-btn layui-btn-sm layui-btn-normal" lay-submit
+                                        lay-filter="update"><i class="layui-icon layui-icon-release"></i> 确认发布
+                                </button>
+                                <button id="draft" type="button" class="layui-btn layui-btn-sm layui-btn-danger" lay-submit
+                                        lay-filter="draft"><i class="layui-icon layui-icon-file-b"></i> 保存草稿
+                                </button>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 类别选择-->
+<script id="categoryTpl" type="text/html">
+    {{#
+        var fn = function(a){
+            var result="";
+            result=layui.laytpl(childsTpl.innerHTML).render(a);
+        return result;
+    };
+    }}
+    <option value="">请选择类别</option>
+    {{# layui.each(d, function(index, item){ }}
+        <option value="{{ item.id }}" {{ d.categoryId==item.id ? 'selected' : '' }}>{{ item.name }}</option>
+        {{#  if(item.childs != null){ }}
+            {{# item.childs.categoryId = d.categoryId; }}
+            {{ fn(item.childs) }}
+        {{#  } }}
+    {{#  }); }}
+</script>
+<!-- 子集选择-->
+<script id="childsTpl" type="text/html">
+    {{#
+    var fn = function(a){
+    var result="";
+    result=layui.laytpl(childsTpl.innerHTML).render(a);
+    return result;
+    };
+    }}
+
+    {{# layui.each(d, function(index, item){ }}
+    <option value="{{ item.id }}" {{ d.categoryId==item.id ? 'selected' : '' }}>
+        {{# if((index+1) === d.length){ }}
+        └─
+        {{# }else{ }}
+        ├─
+        {{# } }}
+        {{ item.name }}
+    </option>
+    {{#  if(item.childs != null){ }}
+    {{# item.childs.categoryId = d.categoryId; }}
+     {{ fn(item.childs) }}
+    {{#  } }}
+    {{#  }); }}
+</script>
+
+    <!-- 引入页脚footer-fragment -->
+    <div th:replace="sys/layout/footer::footer-fragment"></div>
+
+<script type="text/javascript" th:inline="none">
+    layui.config({
+        base: '/static/layuiadmin/'
+    }).extend({
+        index: 'lib/index' //主入口模块
+    }).use(['index','form', 'layer', 'upload', 'common','laytpl', 'element'], function () {
+        var $ = layui.$,
+            layer = layui.layer,
+            upload = layui.upload,
+            common = layui.common,
+            laytpl = layui.laytpl,
+            form = layui.form,
+            admin = layui.admin,
+            element = layui.element;
+
+        //上传
+        var coverSrc = $('#LAY_coverSrc');
+        upload.render({
+            url: '/sys/article/upload'
+            ,elem: '#LAY_coverUpload'
+            ,field: 'file'
+            ,before: function(obj){ //obj参数包含的信息，跟 choose回调完全一致，可参见上文。
+                layer.load(); //上传loading
+            }
+            ,done: function(res){
+                if(res.code == 200){
+                    coverSrc.val(res.data);
+                    layer.msg(res.msg, {icon: 1});
+                } else {
+                    layer.msg(res.msg, {icon: 5});
+                }
+                layer.closeAll('loading'); //关闭loading
+            }
+            ,error: function(index, upload){
+                layer.closeAll('loading'); //关闭loading
+            }
+        });
+
+        //查看
+        admin.events.coverPreview = function(othis){
+            var src = coverSrc.val();
+            layer.photos({
+                photos: {
+                    "title": "查看" //相册标题
+                    ,"data": [{
+                        "src": src //原图地址
+                    }]
+                }
+                ,shade: 0.01
+                ,closeBtn: 1
+                ,anim: 5
+            });
+        };
+
+        var dataId = common.getUrlParam("dataId");
+        var info;
+        //加载信息
+        $.ajax({
+            url: "/sys/article/info/"+dataId,
+            type: 'POST',
+            async:false,
+            success: function(res){
+                if(res.code == 200){
+                    info = res.data;
+                    form.val('articleFrom', info);
+
+                    //已发布
+                    if(info.status == 1){
+                        //隐藏草稿
+                        $("#draft").hide();
+                    }
+
+                }else{
+                    layer.msg(res.msg, {
+                        offset: '15px',
+                        icon: 5,
+                        time: 1000
+                    });
+                }
+            }
+        });
+
+        //md编辑器
+        var editor = $('#md_editor').mdEditor({
+            "url": "/sys/article/upload/markdown",
+            "height": 400,
+            // 默认工具栏
+            "tools": ["bold", "italic", "del", "h1", "hr","quote", "code","link", "upload", "unordered-list", "ordered-list","view", "fullscreen"],
+            "textareaName": "contentMd"
+        });
+
+        //第一次进来加载显示
+        editor.setValue(info.contentMd);
+        //$('.md_editor_output .markdown-body').html()
+
+        $.ajaxSettings.async = false;//同步
+        //标签选择
+        $.post("/sys/tag/select",function(res){
+            if(res.code == 200){
+                var data = res.data;
+                var html = "";
+                layui.each(data, function(index, item){
+                    html +='<span onclick="selectTag(this);" color="'+item.color+'" class="span-color" style="cursor:pointer;margin:5px;background:'+item.color +'">'+ item.name +'</span>';
+                });
+                $(".select-tags").html(html);
+                //动态生成必须更新渲染
+                form.render();
+            }else{
+                layer.msg(res.msg, {
+                    offset: '15px',
+                    icon: 5,
+                    time: 1000
+                });
+            }
+        },'json');
+
+
+
+        var data;
+
+        //类别选择
+        $.post("/sys/category/tree",function(res){
+            if(res.code == 200){
+                data = res.data;
+            }else{
+                layer.msg(res.msg, {
+                    offset: '15px',
+                    icon: 5,
+                    time: 1000
+                });
+            }
+        },'json');
+        //
+        data.categoryId = info.categoryId;
+        //第三步：渲染模版
+        var getTpl = categoryTpl.innerHTML
+            ,view = document.getElementById('categoryId');
+        laytpl(getTpl).render(data, function(html){
+            view.innerHTML = html;
+            //动态生成必须更新渲染
+            form.render();
+            element.render();
+        });
+
+        //赋值渲染
+        $("#tags").val(common.isEmpty(info.tags) ? "" : info.tags.join(","));
+
+        //监听提交
+        form.on('submit(update)', function (data) {
+            dataproc(data);
+            data.field.status = 1; //发布
+            var json = JSON.stringify(data.field);
+            fn(json);
+            return false;
+        });
+        //监听提交草稿
+        form.on('submit(draft)', function (data) {
+            dataproc(data);
+            data.field.status = 0; //草稿
+            var json = JSON.stringify(data.field);
+            fn(json);
+            return false;
+        });
+
+        /**
+         *
+         * 数据处理
+         */
+        var dataproc = function(data){
+            var field = data.field;
+            //Html
+            field.content = $('.md_editor_output .markdown-body').html();
+            field.top = field.top ? 1 : 0;//置顶1未选中0
+            field.recommended = field.recommended ? 1 : 0;//推荐
+            field.original = field.original ? 1 : 0;//原创
+            field.comment = field.comment ? 1 : 0;//评论
+            field.tags = common.isEmpty($("#tags").val()) ? [] : $("#tags").val().split(','); //标签
+            return data;
+        }
+        /**
+         * 添加数据
+         * @param data
+         */
+        var fn = function(data){
+            $.ajax({
+                url: '/sys/article/update',
+                data: data,
+                success: function (res) {
+                    if (res.code == 200) {
+                        layer.msg(res.msg, {
+                            offset: '15px',
+                            icon: 1,
+                            time: 1000
+                        }, function () {
+                            //返回上一页
+                            window.location = 'list.html';
+                        });
+                    } else {
+                        layer.msg(res.msg, {
+                            offset: '15px',
+                            icon: 5,
+                            time: 1000
+                        });
+                    }
+                }
+            });
+        }
+    });
+
+    var tags = [];
+    //标签选择
+    var selectTag = function(e){
+        var t = $(e).text();
+        var s = tags.join(",").indexOf(t);
+        if (s >= 0) {
+            for (var r in tags) {
+                if (tags[r] == t) {
+                    tags.splice(r, 1);
+                }
+            }
+        } else {
+            tags.push(t);
+        }
+        $("#tags").val(tags.join(","));
+    };
+
+</script>
+</body>
+</html>

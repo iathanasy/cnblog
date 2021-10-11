@@ -1,0 +1,239 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+    <header th:replace="sys/layout/header::header-fragment"></header>
+<body>
+    <div class="layui-fluid">
+        <div class="layui-row">
+            <div class="layui-col-md12">
+                <div class="layui-card layui-anim layui-anim-upbit">
+                    <div class="layui-card-header">修改菜单
+                        <span class="btn_right"  >
+					        <a id="back" style="padding-right: 20px;" title="返回上一页" onclick="javascript:window.history.back(-1);"><i class="layui-icon layui-icon-release"></i></a>
+                            <!--<a id="refresh" title="刷新"><i class="layui-icon layui-icon-refresh"></i></a>-->
+                        </span>
+                    </div>
+                    <div class="layui-card-body">
+                        <form class="layui-form" lay-filter="menuFrom" style="padding: 20px 30px 0 0;">
+
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">类型</label>
+                                <div class="layui-input-block">
+                                    <input type="radio" name="menuType" value="M" title="目录" >
+                                    <input type="radio" name="menuType" value="C" title="菜单" checked>
+                                    <input type="radio" name="menuType" value="F" title="按钮">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">菜单名称</label>
+                                <div class="layui-input-block">
+                                    <input type="hidden"  name="menuId"placeholder="菜单ID" class="layui-input">
+                                    <input type="text"  name="menuName" lay-verify="required" autocomplete="off" placeholder="请输入名称" class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">上级菜单</label>
+                                <div class="layui-input-block">
+                                    <input type="hidden"  id="parentId" readonly="readonly" name="parentId"placeholder="上级菜单ID" class="layui-input">
+                                    <input type="text"  id="parentName" lay-verify="required" readonly="readonly" name="parentName" autocomplete="off" placeholder="上级菜单" class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">菜单URL</label>
+                                <div class="layui-input-block">
+                                    <input type="text"  name="url" autocomplete="off" placeholder="请输入菜单URL" class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">是否外链</label>
+                                <div class="layui-input-block">
+                                    <input type="radio" name="isFrame" value="0" title="是" >
+                                    <input type="radio" name="isFrame" value="1" title="否" checked>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">菜单状态</label>
+                                <div class="layui-input-block">
+                                    <input type="radio" name="visible" value="0" title="显示" checked>
+                                    <input type="radio" name="visible" value="1" title="隐藏">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">授权标识</label>
+                                <div class="layui-input-block">
+                                    <input type="text"  name="perms" autocomplete="off" placeholder="多个用逗号分隔，如sys:user:list,sys:user:create" class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">排序号</label>
+                                <div class="layui-input-block">
+                                    <input type="number"  value="0" name="orderNum" autocomplete="off" placeholder="排序号" class="layui-input">
+                                </div>
+                            </div>
+
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">图标</label>
+                                <div class="layui-input-block">
+                                    <input type="text"  name="icon" autocomplete="off" placeholder="菜单图标，请参考上面的提示" class="layui-input">
+                                </div>
+                            </div>
+
+                            <div class="layui-form-item layui-form-text">
+                                <label class="layui-form-label">备注</label>
+                                <div class="layui-input-block">
+                                    <textarea name="remark" placeholder="请输入内容" class="layui-textarea"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="layui-form-item">
+                                <div class="layui-input-block">
+                                    <button class="layui-btn" lay-submit lay-filter="update">立即提交</button>
+                                    <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- 引入页脚footer-fragment -->
+    <div th:replace="sys/layout/footer::footer-fragment"></div>
+    <script type="text/javascript"  th:inline="none">
+        layui.config({
+            base: '/static/layuiadmin/module/'
+        }).use(['form','layer','common', 'eleTree'], function () {
+            var $ = layui.$,
+                layer = layui.layer,
+                common = layui.common,
+                eleTree = layui.eleTree,
+                form = layui.form;
+
+            var dataId = common.getUrlParam("dataId");
+            var el;
+
+            //信息
+            $.ajax({
+                url: "/sys/menu/info/" + dataId,
+                async: false,
+                success: function (res) {
+                    if (res.code == 200) {
+                        var data = res.data;
+                        form.val('menuFrom', data);
+                    }else{
+                        layer.msg(res.msg, {
+                            offset: '15px',
+                            icon: 5,
+                            time: 1000
+                        });
+                    }
+                }
+            });
+
+            //监听提交
+            form.on('submit(update)', function(data){
+                var json =  data.field;
+                $.ajax({
+                    url: "/sys/menu/update",
+                    data: JSON.stringify(json),
+                    success: function(res){
+                        if(res.code == 200){
+                            layer.msg(res.msg, {
+                                offset: '15px',
+                                icon: 1,
+                                time: 1000
+                            }, function () {
+                                //返回上一页
+                                window.location = 'list.html';
+                            });
+                        }else{
+                            layer.msg(res.msg, {
+                                offset: '15px',
+                                icon: 5,
+                                time: 1000
+                            });
+                        }
+                    }
+                });
+                return false;
+            });
+
+            $("#parentName").click(function(){
+                clickMenuSelect();
+            });
+            /**
+             * 菜单选择
+             */
+            function clickMenuSelect(){
+                //打开弹出层
+                layer.open({
+                    type: 1,
+                    offset: '50px',
+                    skin: 'layui-layer-molv',
+                    title: "选择菜单",
+                    area: ['300px', '80%'],
+                    shade: 0,
+                    shadeClose: false,
+                    content: $("#menuLayer"),
+                    btn: ['确定', '取消'],
+                    success: function(){
+                        //加载菜单树
+                        el = eleTree.render({
+                            elem: '#selectTree',
+                            url: "/sys/menu/select",
+                            showCheckbox: true, // 节点是否可被选择
+                            //defaultExpandAll: true, // 是否默认展开所有节点
+                            defaultExpandedKeys: [0], //默认展开的节点的 key 的数组
+                            defaultCheckedKeys: [ $("#parentId").val()],//默认勾选的节点的 key 的数组
+                            checkStrictly: true, //  在显示复选框的情况下，是否严格的遵循父子不互相关联的做法，默认为 false
+                            accordion: true, //是否每次只打开一个同级树节点展开（手风琴效果）
+                            response: {   // 对于后台数据重新定义名字
+                                statusName: "code",
+                                statusCode: 200,
+                                dataName: "data"
+                            },
+                            request: {     // 对后台返回的数据格式重新定义
+                                name: "menuName",
+                                key: "menuId",
+                                children: "childMenus",
+                            },
+                            done: function(res){
+                                // res即为你接口返回的信息。
+                                //console.log(res);
+                            }
+                        });
+                    },
+                    btn1: function (index) {
+                        //确定
+                        //当前选中的赋值给父类的输入框
+                        var select = el.getChecked(false, true);
+                        if(select.length == 0){
+                            layer.msg("必须选择一个");
+                            return;
+                        }
+                        if(select.length > 1){
+                            layer.msg("只能选择一个");
+                            return;
+                        }
+                        $("#parentId").val(select[0].menuId);
+                        $("#parentName").val(select[0].menuName);
+                        layer.close(index);
+                    }
+                });
+            }
+
+            // input被选中事件
+            /*eleTree.on("nodeChecked(tree)",function(d) {
+                console.log(d.data);    // 点击节点对于的数据
+                console.log(d.isChecked);   // input是否被选中
+            })*/
+
+        });
+
+    </script>
+</body>
+
+<!-- 选择菜单 -->
+<div id="menuLayer" style="display: none;padding:10px;">
+    <div id="selectTree" lay-filter="tree"></div>
+</div>
+</html>

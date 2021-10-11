@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.icss.cnblog.mapper.SysRoleMenuMapper">
+
+  <resultMap id="BaseResultMap" type="com.icss.cnblog.entity.SysRoleMenuEntity">
+    <id column="role_id" jdbcType="BIGINT" property="roleId" />
+    <id column="menu_id" jdbcType="BIGINT" property="menuId" />
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    role_id, menu_id
+  </sql>
+
+  <select id="queryMenuIdList" resultType="long">
+		select menu_id from sys_role_menu where role_id = #{value}
+	</select>
+
+    <select id="queryMenuNameList" resultType="String">
+          SELECT DISTINCT
+            CONCAT(
+                m.menu_name,
+                CONCAT('(', m.perms, ')')
+            ) as menu_name
+            FROM
+                sys_menu m
+            LEFT JOIN sys_role_menu rm ON (m.menu_id = rm.menu_id)
+            LEFT JOIN sys_user_role ur ON (rm.role_id = ur.role_id)
+            WHERE
+                m.visible = 0
+            AND ur.user_id = #{value}
+    </select>
+
+
+  <select id="queryMenuIdButtonList" resultType="long">
+		SELECT
+			rm.menu_id
+		FROM
+			sys_role_menu AS rm
+		WHERE
+		  rm.role_id = #{value}
+	</select>
+
+  <delete id="deleteBatch">
+    delete from sys_role_menu where role_id in
+    <foreach item="roleId" collection="array" open="(" separator="," close=")">
+      #{roleId}
+    </foreach>
+  </delete>
+
+</mapper>

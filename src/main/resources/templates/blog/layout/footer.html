@@ -1,0 +1,85 @@
+﻿<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+    <footer th:fragment="footer-fragment">
+
+        <script type="text/javascript" src="/static/layuiadmin/layui/layui.js"></script>
+        <!--代码高亮-->
+        <script src="/static/plugins/md/js/prism.js"></script>
+        <script th:inline="javascript">
+            //注意：导航 依赖 element 模块，否则无法进行功能性操作
+            layui.use(['element','form','laytpl','util'], function() {
+                var laytpl=layui.laytpl,$=layui.jquery,element = layui.element,form = layui.form,util = layui.util;
+
+                //返回顶部
+                util.fixbar({});
+
+                //搜索
+                form.on('submit(search)', function (data) {
+                    var field = data.field;
+                    var keyword = field.keyword;
+                    window.location.href = "/search/" + keyword;
+                    return false;
+                });
+
+                //标签选择
+                $.get("/api/tags",function(res){
+                    if(res.code == 200){
+                        var data = res.data;
+                        var html = "";
+                        layui.each(data, function(index, item){
+                            html += '<a class="span-color" href="/tag/'+ item.id +'" title="'+item.remark+'" style="cursor:pointer;margin:5px;background-color: '+item.color +'">'+item.name+'</a>';
+                        });
+                        $(".tags").html(html);
+                        //动态生成必须更新渲染
+                        form.render();
+                    }else{
+                        layer.msg(res.msg, {
+                            offset: '15px',
+                            icon: 5,
+                            time: 1000
+                        });
+                    }
+                },'json');
+
+                //第三步：渲染模版
+                var data = {};
+                $.get("/api/nav",function(result,status){
+                    if(result.code == 200){
+                        data = result.data;
+                        var getTpl = nav.innerHTML
+                            ,view = document.getElementById('view');
+                        laytpl(getTpl).render(data, function(html){
+                            view.innerHTML = html;
+                            element.render();
+                        });
+                    }
+                    if(result.code == 401){
+                        layer.msg(result.msg, {
+                            offset: '15px',
+                            icon: 5,
+                            time: 1000
+                        });
+                    }
+                });
+
+                //导航的hover效果、二级菜单等功能，需要依赖element模块
+                if ($("body").width() < 740){
+                    //console.log(document.documentElement.clientWidth);
+                }
+                var navName = [[${url}]];
+                $(".layui-this").removeClass("layui-this");
+                $(".layui-nav li[name='"+ navName +"']").addClass("layui-this");
+
+                //
+            });
+
+        </script>
+
+        <p class="layui-text copyright"> <span th:utext="${website['copyright']}"></span>
+            · Powered by <span th:text="${website['siteName']}"></span>
+            | <a href="/login">登录</a>
+        </p>
+        <p style="font-size: 13px"><a href="http://www.beian.miit.gov.cn" target="_blank" th:text="${website['icp']}"></a></p>
+        <div th:utext="${website['statistics']}"></div>
+    </footer>
+</html>

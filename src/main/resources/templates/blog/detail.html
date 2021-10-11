@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="blog/layout/header::head-fragment(${article.title},${article.summary})"></head>
+
+<link rel="stylesheet" href="/static/plugins/md/css/github-markdown.css">
+<body>
+
+<header th:replace="blog/layout/header::header-fragment"></header>
+
+<main>
+    <div>
+    <div class="layui-row layui-col-space10">
+        <div class="layui-col-md12">
+            <div class="layui-card">
+                <!--        <div class="layui-card-header">标题</div>-->
+                <div class="layui-card-body">
+                    <i class="layui-icon layui-icon-speaker"></i>
+                    <a class="speaker" href="/">结合 layui 的栅格系统</a>
+                </div>
+            </div>
+        </div>
+        <div class="layui-col-md9">
+            <div class="layui-card">
+                <div class="layui-card-body">
+                    <div class="article">
+                        <div class="meta">
+                            <h1 th:text="${article.title}"></h1>
+                            <p class="info">
+                                <span><i class="layui-icon layui-icon-list"></i> <a th:href="@{'/category/'+ ${article.alias}}" th:text="${article.name}"></a>&nbsp;</span>
+                                <span th:title="${#dates.format(article.createTime,'yyyy-MM-dd HH:m:s')}"><i class="layui-icon layui-icon-time"></i> [[${article.releaseTime}]]&nbsp;</span>
+                                <span><i class="layui-icon layui-icon-release"></i> [[${article.pv}]]&nbsp;</span>
+                                <span><i class="layui-icon layui-icon-reply-fill"></i> &nbsp; 0</span>
+                            </p>
+                            <span class="meta-tags">
+                                <i class="layui-icon layui-icon-note"></i>
+                                <th:block th:each="tag: ${article.tagList}">
+                                    <a th:href="@{'/tag/'+ ${tag.id}}" class="tag" th:text="${tag.name} + '&nbsp;'"></a>
+                                </th:block>
+
+                            </span>
+                        </div>
+
+                        <div class="markdown-body" th:utext="${article.content}"></div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <!-- 侧边栏-->
+        <div class="layui-col-md3">
+            <div th:replace="blog/layout/side::side-fragment"></div>
+        </div>
+    </div>
+    </div>
+</main>
+
+<footer th:replace="blog/layout/footer::footer-fragment"></footer>
+
+<script th:inline="javascript">
+    layui.use('layer', function(){ //加载code模块
+        var $ = layui.jquery,
+            layer = layui.layer;
+
+        //相册
+        if($(window).width() > 750){
+            layer.photos({
+                photos: '.markdown-body' //图片父容器
+                ,zIndex: 9999999999
+                ,anim: -1
+            });
+        } else {
+            $('body').on('click', '.markdown-body img', function(){
+                window.open(this.src);
+            });
+        }
+
+    });
+</script>
+</body>
+</html>
